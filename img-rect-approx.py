@@ -9,7 +9,7 @@ from PIL import Image
 
 # maximum width & height of rectangles;
 # smaller = initially slower but later faster
-MAX_RECT_SIZE = 20
+MAX_RECT_SIZE = 50
 
 # how often to write an output file
 SAVE_EVERY_N_ROUNDS = 10
