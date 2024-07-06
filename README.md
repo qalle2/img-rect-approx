@@ -43,15 +43,14 @@ The original image and an approximation with 1000 rectangles:
 ![approximation of Doom title screen; looks a like a very poor-quality JPEG or video file](doom-1000rect.png)
 
 ## Example &ndash; Wolfenstein 3D
-
 The original image and an approximation with 1000 rectangles:
 
 ![Wolfenstein 3D title screen](wolf3d.png)
 ![approximation of Wolfenstein 3D title screen; looks a like a very poor-quality JPEG or video file](wolf3d-1000rect.png)
 
 ## Example &ndash; Pride flag
-
 The original image and an approximation with 1000 rectangles:
+
 ![intersex-inclusive progressive pride flag](pride.png)
 ![an approximation of the pride flag; looks a like a very poor-quality JPEG or video file](pride-1000rect.png)
 
