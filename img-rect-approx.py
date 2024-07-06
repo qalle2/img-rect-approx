@@ -1,21 +1,27 @@
 # approximate an image by drawing rectangles at random;
 # continue forever and save an image every n rounds
 
-import os, sys
-from copy import deepcopy
+import os, sys, time
 from itertools import chain
 from random import randrange
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    sys.exit("Pillow module required. See https://python-pillow.org")
 
 # maximum width & height of rectangles;
-# smaller = initially slower but later faster
-MAX_RECT_SIZE = 50
+# smaller = better quality for time spent
+MAX_RECT_SIZE = 40
+
+# how often to print a status message
+PRINT_EVERY_N_ROUNDS = 10
 
 # how often to write an output file
-SAVE_EVERY_N_ROUNDS = 10
+SAVE_EVERY_N_ROUNDS = 100
 
 def read_image(filename):
-    # generate pixel rows (tuple of tuples of ints)
+    # read image file;
+    # generate: one pixel row (tuple of tuples of ints) per call
     with open(filename, "rb") as handle:
         handle.seek(0)
         image = Image.open(handle)
@@ -28,70 +34,72 @@ def read_image(filename):
         for y in range(image.height):
             yield tuple(image.crop((0, y, image.width, y + 1)).getdata())
 
-def get_average_color(pixels, imageWidth, imageHeight):
-    # get average color (tuple of ints);
-    # pixels: tuple of tuples of tuples of ints
+def get_average_color(image, imageWidth, imageHeight):
+    # get the average color of an image
+    # image:  iterable of iterables of tuples of ints
+    # return: (red, green, blue)
     componentSums = [0 for i in range(3)]
-    for pixel in chain.from_iterable(pixels):
+    for pixel in chain.from_iterable(image):
         for i in range(3):
             componentSums[i] += pixel[i]
     return tuple(
         round(s / (imageWidth * imageHeight)) for s in componentSums
     )
 
-def get_color_diff(rgb1, rgb2):
-    # get difference of two (red, green, blue) colors
+def get_color_diff(color1, color2):
+    # get difference of two colors
+    # color1, color2: (red, green, blue)
+    # return:         difference (int)
     return (
-        2 * abs(rgb1[0] - rgb2[0])
-        + 3 * abs(rgb1[1] - rgb2[1])
-        + abs(rgb1[2] - rgb2[2])
+          2 * abs(color1[0] - color2[0])
+        + 3 * abs(color1[1] - color2[1])
+        +     abs(color1[2] - color2[2])
     )
 
 def get_image_diff(image1, image2):
-    # image1, image2: tuple of tuples of tuples of ints
+    # get difference between two images
+    # image1: iterable of iterables of tuples of ints
+    # image2: iterable of iterables of tuples of ints
+    # return: difference (int)
     return sum(
         sum(get_color_diff(pix1, pix2) for (pix1, pix2) in zip(row1, row2))
         for (row1, row2) in zip(image1, image2)
     )
 
-def get_image_and_color_diff(pixels, red, green, blue):
-    # image: tuple of tuples of tuples of ints
-    # r, g, b: a color
+def get_image_and_color_diff(image, color):
+    # get difference between an image and a color (as if one of two images was
+    # filled with that color)
+    # image:  iterable of iterables of tuples of ints
+    # color:  (red, green, blue)
+    # return: total difference
     return sum(
-        sum(get_color_diff(pix, (red, green, blue)) for pix in row)
-        for row in pixels
+        sum(get_color_diff(pix, color) for pix in row) for row in image
     )
 
 def get_random_rect(imageWidth, imageHeight):
-    # get properties of a random rectangle
+    # get the properties of a random rectangle
+    # return: (dimensions, colors); that is,
+    #         ((x, y, width, height), (red, green, blue))
     width  = randrange(1, MAX_RECT_SIZE + 1)
     height = randrange(1, MAX_RECT_SIZE + 1)
     x      = randrange(imageWidth  - width + 1)
     y      = randrange(imageHeight - height + 1)
-    red    = randrange(256)
-    green  = randrange(256)
-    blue   = randrange(256)
-    return (x, y, width, height, red, green, blue)
+    color  = tuple(randrange(256) for i in range(3))
+    return ((x, y, width, height), color)
 
-def crop_image(pixels, xStart, yStart, width, height):
-    # pixels, return value: tuple of tuples of tuples of ints
+def crop_image(image, dimensions):
+    # image:      iterable of iterables of tuples of ints
+    # dimensions: (x, y, width, height)
+    # return:     tuple of tuples of tuples of ints
+    (xStart, yStart, width, height) = dimensions
     return tuple(
-        row[xStart:xStart+width] for (y, row) in enumerate(pixels)
+        tuple(row[xStart:xStart+width]) for (y, row) in enumerate(image)
         if yStart <= y < yStart + height
     )
 
-def apply_rect_to_image(
-    oldPixels, xStart, yStart, width, height, red, green, blue
-):
-    # draw rectangle on pixel data, return new pixel data
-    newPixels = deepcopy(oldPixels)
-    newSlice = width * [(red, green, blue)]
-    for y in range(yStart, yStart + height):
-        newPixels[y][xStart:xStart+width] = newSlice
-    return newPixels
-
 def write_image(pixels, imageWidth, imageHeight, filename):
-    # write PNG; pixels: tuple of tuples of tuples of ints
+    # write a PNG file
+    # pixels: iterable of iterables of tuples of ints
 
     # copy pixels to image via temporary image
     image = Image.new("RGB", (imageWidth, imageHeight))
@@ -116,51 +124,65 @@ def main():
 
     print("Reading image...")
     # tuple of tuples of tuples of ints
-    origPixels = tuple(read_image(inputFile))
-    imageHeight = len(origPixels)
-    imageWidth  = len(origPixels[0])
+    origImage = tuple(read_image(inputFile))
+    imageHeight = len(origImage)
+    imageWidth  = len(origImage[0])
 
-    # create canvas filled with average color of original image
-    origAverageColor = get_average_color(origPixels, imageWidth, imageHeight)
-    newPixels = [
+    # create canvas filled with average color of original image:
+    # list of lists of tuples of ints
+    origAverageColor = get_average_color(origImage, imageWidth, imageHeight)
+    newImage = [
         [origAverageColor for x in range(imageWidth)]
         for y in range(imageHeight)
     ]
 
-    initialDiff = get_image_diff(origPixels, newPixels)
-    print("Initial difference:", initialDiff)
-
     round_ = 1
-    while True:
-        print(f"Drawing rectangle #{round_}")
+    initialDiff = get_image_diff(origImage, newImage)
+    currentDiff = initialDiff
+    startTime = time.time()
 
-        # get a random rectangle that makes the current image less different
-        # from the target image
+    while True:
+        # get a random rectangle that would make the current image less
+        # different from the target image
         while True:
-            rect = get_random_rect(imageWidth, imageHeight)
-            (x, y, width, height, red, green, blue) = rect
-            origCropped = crop_image(origPixels, x, y, width, height)
-            currCropped = crop_image(newPixels,  x, y, width, height)
-            oldDiff = get_image_diff(origCropped, currCropped)
-            diff = get_image_and_color_diff(origCropped, red, green, blue)
-            if diff < oldDiff:
+            (dimensions, color) = get_random_rect(imageWidth, imageHeight)
+            origCropped = crop_image(origImage, dimensions)
+            newCropped  = crop_image(newImage,  dimensions)
+            oldRectDiff = get_image_diff(origCropped, newCropped)
+            newRectDiff = get_image_and_color_diff(origCropped, color)
+            if newRectDiff < oldRectDiff:
                 break
 
-        # apply the rectangle for real
-        newPixels = apply_rect_to_image(newPixels, *rect)
+        # apply rectangle to current image
+        (xStart, yStart, width, height) = dimensions
+        for y in range(yStart, yStart + height):
+            newImage[y][xStart:xStart+width] = width * [color]
 
-        # every now and then, print difference to original and save image
+        # update difference to original image
+        currentDiff -= oldRectDiff - newRectDiff
+
+        # print status every n rounds
+        if round_ % PRINT_EVERY_N_ROUNDS == 0:
+            print(
+                "Rectangles: {}; error: {:.1f}% of blank canvas; time "
+                "elapsed: {:.1f} s".format(
+                    round_,
+                    currentDiff * 100 / initialDiff,
+                    time.time() - startTime
+                )
+            )
+
+        # save image every n rounds
         if round_ % SAVE_EVERY_N_ROUNDS == 0:
-            diff = get_image_diff(origPixels, newPixels)
-            print("Difference is now {} ({:.1f}% of initial)".format(
-                diff, diff * 100 / initialDiff
-            ))
-            #
-            filename = f"{outputFilePrefix}{round_:03}.png"
+            filename = f"{outputFilePrefix}{round_:04}.png"
             if os.path.exists(filename):
-                sys.exit(f"File {filename} already exists; quitting.")
-            print(f"Writing {filename}")
-            write_image(newPixels, imageWidth, imageHeight, filename)
+                print(
+                    f"Warning: {filename} already exists, not overwriting",
+                    file=sys.stderr
+                )
+            else:
+                print(f"Writing {filename}")
+                write_image(newImage, imageWidth, imageHeight, filename)
 
         round_ += 1
 
