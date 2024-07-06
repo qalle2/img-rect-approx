@@ -1,13 +1,15 @@
 # img-rect-approx
-Approximate an image by drawing rectangles at random on a blank canvas. Continues forever and saves an image every 10 rounds. Slow. Requires the [Pillow](https://python-pillow.org) module. `doom.png` is from ''Doom'' by id Software.
+Approximate an image by drawing rectangles at random on a blank canvas. Continues forever and saves an image every 10 rounds. Slow. Requires the [Pillow](https://python-pillow.org) module. `doom.png` is from *Doom* by id Software.
 
 ## Command line arguments
-''inputFile outputFilePrefix''
+*inputFile outputFilePrefix*
 
 ## Example
+This command:
+
 `python3 img-rect-approx.py doom.png rect`
 
-will write `rect010.png`, `rect020.png`, etc. and print this (the exact numbers vary):
+will write `rect010.png`, `rect020.png`, etc., and print this (the exact numbers vary):
 
 ```
 Reading image...
@@ -28,7 +30,7 @@ Difference after rectangle 11: 21010499 (99.7% of initial)
 
 (and so on)
 
-The original image and an approximation with ten rectangles:
+The original image (`doom.png`) and an approximation with ten rectangles (`rect010.png`):
 
 ![Doom title screen](doom.png)
-![a few small rectangles on a dark red background](doom-10rect.png)
+![a few small colourful rectangles on a brown background](doom-10rect.png)
