@@ -30,7 +30,7 @@ Difference after rectangle 11: 21010499 (99.7% of initial)
 
 (and so on)
 
-The original image (`doom.png`) and an approximation with 20 rectangles:
+The original image and an approximation with 1000 rectangles:
 
 ![Doom title screen](doom.png)
-![a few small colourful rectangles on a brown background](doom-20rect.png)
+![approximation of Doom title screen; looks a like a very poor-quality JPEG or video file](doom-1000rect.png)

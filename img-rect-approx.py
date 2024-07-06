@@ -41,8 +41,10 @@ def get_average_color(pixels, imageWidth, imageHeight):
 
 def get_color_diff(rgb1, rgb2):
     # get difference of two (red, green, blue) colors
-    return sum(
-        weight * abs(rgb1[i] - rgb2[i]) for (i, weight) in enumerate((2, 3, 1))
+    return (
+        2 * abs(rgb1[0] - rgb2[0])
+        + 3 * abs(rgb1[1] - rgb2[1])
+        + abs(rgb1[2] - rgb2[2])
     )
 
 def get_image_diff(image1, image2):
@@ -50,6 +52,14 @@ def get_image_diff(image1, image2):
     return sum(
         sum(get_color_diff(pix1, pix2) for (pix1, pix2) in zip(row1, row2))
         for (row1, row2) in zip(image1, image2)
+    )
+
+def get_image_and_color_diff(pixels, red, green, blue):
+    # image: tuple of tuples of tuples of ints
+    # r, g, b: a color
+    return sum(
+        sum(get_color_diff(pix, (red, green, blue)) for pix in row)
+        for row in pixels
     )
 
 def get_random_rect(imageWidth, imageHeight):
@@ -62,6 +72,13 @@ def get_random_rect(imageWidth, imageHeight):
     green  = randrange(256)
     blue   = randrange(256)
     return (x, y, width, height, red, green, blue)
+
+def crop_image(pixels, xStart, yStart, width, height):
+    # pixels, return value: tuple of tuples of tuples of ints
+    return tuple(
+        row[xStart:xStart+width] for (y, row) in enumerate(pixels)
+        if yStart <= y < yStart + height
+    )
 
 def apply_rect_to_image(
     oldPixels, xStart, yStart, width, height, red, green, blue
@@ -114,34 +131,37 @@ def main():
     print("Initial difference:", initialDiff)
 
     round_ = 1
-    prevDiff = initialDiff
     while True:
+        print(f"Drawing rectangle #{round_}")
+
         # get a random rectangle that makes the current image less different
         # from the target image
         while True:
             rect = get_random_rect(imageWidth, imageHeight)
-            candidate = apply_rect_to_image(newPixels, *rect)
-            diff = get_image_diff(origPixels, candidate)
-            if diff < prevDiff:
+            (x, y, width, height, red, green, blue) = rect
+            origCropped = crop_image(origPixels, x, y, width, height)
+            currCropped = crop_image(newPixels,  x, y, width, height)
+            oldDiff = get_image_diff(origCropped, currCropped)
+            diff = get_image_and_color_diff(origCropped, red, green, blue)
+            if diff < oldDiff:
                 break
 
         # apply the rectangle for real
-        newPixels = deepcopy(candidate)
-        print(
-            "Difference after rectangle {}: {} ({:.1f}% of initial)".format(
-                round_, diff, diff * 100 / initialDiff
-            )
-        )
+        newPixels = apply_rect_to_image(newPixels, *rect)
 
-        # save image every now and then
+        # every now and then, print difference to original and save image
         if round_ % SAVE_EVERY_N_ROUNDS == 0:
+            diff = get_image_diff(origPixels, newPixels)
+            print("Difference is now {} ({:.1f}% of initial)".format(
+                diff, diff * 100 / initialDiff
+            ))
+            #
             filename = f"{outputFilePrefix}{round_:03}.png"
             if os.path.exists(filename):
                 sys.exit(f"File {filename} already exists; quitting.")
-            print(f"Writing {filename}...")
+            print(f"Writing {filename}")
             write_image(newPixels, imageWidth, imageHeight, filename)
-        round_ += 1
 
-        prevDiff = diff
+        round_ += 1
 
 main()
