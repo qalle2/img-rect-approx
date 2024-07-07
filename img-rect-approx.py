@@ -1,5 +1,4 @@
-# approximate an image by drawing rectangles at random;
-# continue forever and save an image every n rounds
+# approximate an image by drawing rectangles at random
 
 import os, sys, time
 from itertools import chain
@@ -9,28 +8,63 @@ try:
 except ImportError:
     sys.exit("Pillow module required. See https://python-pillow.org")
 
-# maximum width & height of rectangles;
-# smaller = better quality for time spent
-MAX_RECT_SIZE = 40
-
 # how often to print a status message
-PRINT_EVERY_N_ROUNDS = 10
+PRINT_EVERY_N_ROUNDS = 100
 
-# how often to write an output file
-SAVE_EVERY_N_ROUNDS = 100
+def parse_integer(stri, minValue, descr):
+    try:
+        value = int(stri, 10)
+        if value < minValue:
+            raise ValueError
+    except ValueError:
+        sys.exit(f"{descr} must be an integer and {minValue} or greater.")
+    return value
 
-def read_image(filename):
+def parse_args():
+    # parse command line arguments
+
+    if not 3 <= len(sys.argv) <= 5:
+        sys.exit(
+            "Arguments: inputFile outputFile [numberOfRectangles "
+            "[maxRectangleSize]]"
+        )
+    (inputFile, outputFile) = sys.argv[1:3]
+    rectCount = sys.argv[3]   if len(sys.argv) >= 4 else "1000"
+    maxRectSize = sys.argv[4] if len(sys.argv) >= 5 else "20"
+
+    rectCount   = parse_integer(rectCount,   0, "Number of rectangles")
+    maxRectSize = parse_integer(maxRectSize, 1, "Maximum rectangle size")
+
+    if not os.path.isfile(inputFile):
+        sys.exit("Input file not found.")
+    if os.path.exists(outputFile):
+        sys.exit("Output file already exists.")
+
+    return {
+        "inputFile":   inputFile,
+        "outputFile":  outputFile,
+        "rectCount":   rectCount,
+        "maxRectSize": maxRectSize,
+    }
+
+def read_image(filename, minWidthAndHeight):
     # read image file;
     # generate: one pixel row (tuple of tuples of ints) per call
     with open(filename, "rb") as handle:
         handle.seek(0)
         image = Image.open(handle)
-        if image.width < MAX_RECT_SIZE:
-            sys.exit(f"Must be at least {MAX_RECT_SIZE} pixels wide.")
-        if image.height < MAX_RECT_SIZE:
-            sys.exit(f"Must be at least {MAX_RECT_SIZE} pixels tall.")
+
+        if image.width < minWidthAndHeight:
+            sys.exit(f"Must be at least {minWidthAndHeight} pixels wide.")
+        if image.height < minWidthAndHeight:
+            sys.exit(f"Must be at least {minWidthAndHeight} pixels tall.")
         if image.mode in ("L", "P"):
             image = image.convert("RGB")
+        elif image.mode != "RGB":
+            sys.exit(
+                "Unrecognized pixel format (try removing the alpha channel)."
+            )
+
         for y in range(image.height):
             yield tuple(image.crop((0, y, image.width, y + 1)).getdata())
 
@@ -76,12 +110,12 @@ def get_image_and_color_diff(image, color):
         sum(get_color_diff(pix, color) for pix in row) for row in image
     )
 
-def get_random_rect(imageWidth, imageHeight):
+def get_random_rect(imageWidth, imageHeight, maxRectSize):
     # get the properties of a random rectangle
     # return: (dimensions, colors); that is,
     #         ((x, y, width, height), (red, green, blue))
-    width  = randrange(1, MAX_RECT_SIZE + 1)
-    height = randrange(1, MAX_RECT_SIZE + 1)
+    width  = randrange(1, maxRectSize + 1)
+    height = randrange(1, maxRectSize + 1)
     x      = randrange(imageWidth  - width + 1)
     y      = randrange(imageHeight - height + 1)
     color  = tuple(randrange(256) for i in range(3))
@@ -113,39 +147,41 @@ def write_image(pixels, imageWidth, imageHeight, filename):
         image.save(handle, "png")
 
 def main():
-    # parse arguments
-    if len(sys.argv) != 3:
-        sys.exit("Arguments: INPUT_FILE OUTPUT_FILE_PREFIX (e.g. in.png rect)")
-    (inputFile, outputFilePrefix) = sys.argv[1:3]
-    if not os.path.isfile(inputFile):
-        sys.exit("Input file not found.")
-    if outputFilePrefix == "":
-        sys.exit("Output file prefix must not be empty.")
+    startTime = time.time()
+    args = parse_args()
 
-    print("Reading image...")
+    print("Reading {}...".format(args["inputFile"]))
     # tuple of tuples of tuples of ints
-    origImage = tuple(read_image(inputFile))
+    origImage = tuple(read_image(args["inputFile"], args["maxRectSize"]))
     imageHeight = len(origImage)
     imageWidth  = len(origImage[0])
 
     # create canvas filled with average color of original image:
     # list of lists of tuples of ints
     origAverageColor = get_average_color(origImage, imageWidth, imageHeight)
+    print("Creating a blank canvas filled with color {}...".format(
+        origAverageColor
+    ))
     newImage = [
         [origAverageColor for x in range(imageWidth)]
         for y in range(imageHeight)
     ]
 
-    round_ = 1
-    initialDiff = get_image_diff(origImage, newImage)
-    currentDiff = initialDiff
-    startTime = time.time()
+    initialImageDiff = get_image_diff(origImage, newImage)
+    currentImageDiff = initialImageDiff
 
-    while True:
+    print(
+        "Painting {} rectangle(s) of maximum width & height {} on canvas..."
+        .format(args["rectCount"], args["maxRectSize"])
+    )
+
+    for round_ in range(1, args["rectCount"] + 1):
         # get a random rectangle that would make the current image less
         # different from the target image
         while True:
-            (dimensions, color) = get_random_rect(imageWidth, imageHeight)
+            (dimensions, color) = get_random_rect(
+                imageWidth, imageHeight, args["maxRectSize"]
+            )
             origCropped = crop_image(origImage, dimensions)
             newCropped  = crop_image(newImage,  dimensions)
             oldRectDiff = get_image_diff(origCropped, newCropped)
@@ -158,32 +194,21 @@ def main():
         for y in range(yStart, yStart + height):
             newImage[y][xStart:xStart+width] = width * [color]
 
-        # update difference to original image
-        currentDiff -= oldRectDiff - newRectDiff
+        # update difference from original image
+        currentImageDiff -= oldRectDiff - newRectDiff
 
         # print status every n rounds
         if round_ % PRINT_EVERY_N_ROUNDS == 0:
             print(
-                "Rectangles: {}; error: {:.1f}% of blank canvas; time "
-                "elapsed: {:.1f} s".format(
-                    round_,
-                    currentDiff * 100 / initialDiff,
-                    time.time() - startTime
+                "{:6} rectangle(s) painted. Canvas differs from original "
+                "image {:4.1f}% less than blank canvas did.".format(
+                    round_, (1 - currentImageDiff / initialImageDiff) * 100
                 )
             )
 
-        # save image every n rounds
-        if round_ % SAVE_EVERY_N_ROUNDS == 0:
-            filename = f"{outputFilePrefix}{round_:04}.png"
-            if os.path.exists(filename):
-                print(
-                    f"Warning: {filename} already exists, not overwriting",
-                    file=sys.stderr
-                )
-            else:
-                print(f"Writing {filename}")
-                write_image(newImage, imageWidth, imageHeight, filename)
+    print("Writing canvas to {}...".format(args["outputFile"]))
+    write_image(newImage, imageWidth, imageHeight, args["outputFile"])
 
-        round_ += 1
+    print("Time elapsed: {:.1f} second(s).".format(time.time() - startTime))
 
 main()

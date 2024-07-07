@@ -1,39 +1,79 @@
 # img-rect-approx
-Approximate an image by drawing rectangles at random on a blank canvas. Continues forever and saves an image every 10 rounds. Slow. Requires the [Pillow](https://python-pillow.org) module.
+Approximate an image by drawing rectangles at random. Requires the [Pillow](https://python-pillow.org) module.
 
 Table of contents:
+* [How it works](#how-it-works)
 * [Command line arguments](#command-line-arguments)
 * [Example &ndash; Doom](#example--doom)
 * [Example &ndash; Wolfenstein 3D](#example--wolfenstein-3d)
 * [Example &ndash; pride flag](#example--pride-flag)
-* [Sources of test files](#sources-of-test-files)
+
+## How it works
+1. Read an image file.
+2. Create a canvas filled with the average color of the original image.
+3. Paint a rectangle with a random position, size and color on the canvas.
+4. Undo step 3 if it did not make the canvas more similar to the original image.
+5. Go to step 3 unless enough rectangles have been painted.
+6. Write the canvas to a PNG file.
 
 ## Command line arguments
-*inputFile outputFilePrefix*
+*inputFile outputFile numberOfRectangles maxRectangleSize*
+* *inputFile*: image file to read
+  * must not have an alpha channel
+* *outputFile*: PNG image file to write
+  * will not be overwritten if already exists
+* *numberOfRectangles*: how many rectangles to paint
+  * optional but must be specified if *maxRectangleSize* needs to be specified
+  * a nonnegative integer, default = 1000
+  * greater value = better image quality but slower
+* *maxRectangleSize*: maximum width and height of rectangles in pixels
+  * optional
+  * a positive integer, default = 20
+  * smaller value = better quality and faster
 
 ## Example &ndash; Doom
-This command will read `doom.png` and write `rect0100.png`, `rect0200.png`, etc., every 100 rectangles:
-
-`python3 img-rect-approx.py doom.png rect`
-
-The original image and an approximation with 2000 rectangles:
+Original title screen from *Doom* by id Software:
 
 ![Doom title screen](doom.png)
-![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-2000rect.png)
+
+Image generated with command `python3 img-rect-approx.py doom.png doom-2000rect-max20px.png 2000 20` (31 seconds on my computer):
+
+![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-2000rect-max20px.png)
+
+Image generated with command `python3 img-rect-approx.py doom.png doom-4000rect-max20px.png 4000 20` (142 seconds on my computer):
+
+![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-4000rect-max20px.png)
+
+Image generated with command `python3 img-rect-approx.py doom.png doom-20000rect-max5px.png 20000 5` (85 seconds on my computer):
+
+![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-20000rect-max5px.png)
+
+Image generated with command `python3 img-rect-approx.py doom.png doom-2000rect-max40px.png 2000 40` (431 seconds on my computer):
+
+![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-2000rect-max40px.png)
 
 ## Example &ndash; Wolfenstein 3D
-The original image and an approximation with 2000 rectangles:
+Original title screen from *Wolfenstein 3D* by id Software:
 
 ![Wolfenstein 3D title screen](wolf3d.png)
-![approximation of Wolfenstein 3D title screen; looks a like a poor-quality JPEG or video file](wolf3d-2000rect.png)
+
+Image generated with command `python3 img-rect-approx.py wolf3d.png wolf3d-2000rect-max20px.png 2000 20` (40 seconds on my computer):
+
+![approximation of Wolfenstein 3D title screen; looks a like a poor-quality JPEG or video file](wolf3d-2000rect-max20px.png)
+
+Image generated with command `python3 img-rect-approx.py wolf3d.png wolf3d-4000rect-max20px.png 4000 20` (206 seconds on my computer):
+
+![approximation of Wolfenstein 3D title screen; looks a like a poor-quality JPEG or video file](wolf3d-4000rect-max20px.png)
 
 ## Example &ndash; Pride flag
-The original image and an approximation with 2000 rectangles:
+Original intersex-inclusive progressive pride flag ([source](https://commons.wikimedia.org/wiki/File:Intersex-inclusive_pride_flag.svg)):
 
 ![intersex-inclusive progressive pride flag](pride.png)
-![an approximation of the pride flag; looks a like a poor-quality JPEG or video file](pride-2000rect.png)
 
-## Sources of test files
-* `doom.png`: screenshot of *Doom* by id Software
-* `rainbow.png`: [Wikimedia Commons &ndash; Intersex-inclusive pride flag](https://commons.wikimedia.org/wiki/File:Intersex-inclusive_pride_flag.svg)
-* `wolf3d.png`: screenshot of *Wolfenstein 3D* by id Software
+Image generated with command `python3 img-rect-approx.py pride.png pride-2000rect-max20px.png 2000 20` (12 seconds on my computer):
+
+![approximation of intersex-inclusive progressive pride flag; looks a like a poor-quality JPEG or video file](pride-2000rect-max20px.png)
+
+Image generated with command `python3 img-rect-approx.py pride.png pride-4000rect-max20px.png 4000 20` (106 seconds on my computer):
+
+![approximation of intersex-inclusive progressive pride flag; looks a like a poor-quality JPEG or video file](pride-4000rect-max20px.png)
