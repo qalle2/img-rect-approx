@@ -44,9 +44,17 @@ Image generated with command `python3 img-rect-approx.py doom.png doom-4000rect-
 
 ![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-4000rect-max20px.png)
 
+Image generated with command `python3 img-rect-approx.py doom.png doom-8000rect-max20px.png 8000 20` (885 seconds on my computer):
+
+![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-8000rect-max20px.png)
+
 Image generated with command `python3 img-rect-approx.py doom.png doom-20000rect-max5px.png 20000 5` (85 seconds on my computer):
 
 ![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-20000rect-max5px.png)
+
+Image generated with command `python3 img-rect-approx.py doom.png doom-10000rect-max10px.png 10000 10` (110 seconds on my computer):
+
+![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-10000rect-max10px.png)
 
 Image generated with command `python3 img-rect-approx.py doom.png doom-2000rect-max40px.png 2000 40` (431 seconds on my computer):
 
