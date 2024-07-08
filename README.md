@@ -29,6 +29,7 @@ Table of contents:
 * *maxRectangleSize*: maximum width and height of rectangles in pixels
   * optional
   * a positive integer, default = 20
+  * must be less than or equal to *inputFile*'s width and height
   * smaller value = better quality and faster
 
 ## Example &ndash; Doom
