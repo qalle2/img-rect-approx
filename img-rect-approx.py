@@ -66,7 +66,7 @@ def get_color_diff(color1, color2):
 def get_image_difference(image1, image2):
     # get difference between two images
     return sum(
-        get_color_diff(*colors) for colors
+        get_color_diff(color1, color2) for (color1, color2)
         in zip(image1.getdata(), image2.getdata())
     )
 
@@ -75,16 +75,6 @@ def get_image_and_color_difference(image, color):
     # equivalent to difference of two images as if one of them was filled with
     # the color
     return sum(get_color_diff(pix, color) for pix in image.getdata())
-
-def get_random_rect(imageWidth, imageHeight, maxRectSize):
-    # get the properties of a random rectangle
-    # return: (x, y, width, height, (red, green, blue))
-    width  = randrange(1, maxRectSize + 1)
-    height = randrange(1, maxRectSize + 1)
-    x      = randrange(imageWidth  - width + 1)
-    y      = randrange(imageHeight - height + 1)
-    color  = tuple(randrange(256) for i in range(3))
-    return (x, y, width, height, color)
 
 def get_new_image(origImage, args):
     # origImage: original Pillow image
