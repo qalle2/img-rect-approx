@@ -7,6 +7,7 @@ Table of contents:
 * [Example &ndash; Doom](#example--doom)
 * [Example &ndash; Wolfenstein 3D](#example--wolfenstein-3d)
 * [Example &ndash; pride flag](#example--pride-flag)
+* [Example &ndash; Lena](#example--lena)
 
 ## How it works
 1. Read an image file.
@@ -39,27 +40,27 @@ Original title screen from *Doom* by id Software:
 
 Image generated with command `python3 img-rect-approx.py doom.png doom-2000rect-max20px.png 2000 20` (31 seconds on my computer):
 
-![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-2000rect-max20px.png)
+![approximation of Doom title screen; looks like a poor-quality JPEG or video file](doom-2000rect-max20px.png)
 
 Image generated with command `python3 img-rect-approx.py doom.png doom-4000rect-max20px.png 4000 20` (142 seconds on my computer):
 
-![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-4000rect-max20px.png)
+![approximation of Doom title screen; looks like a poor-quality JPEG or video file](doom-4000rect-max20px.png)
 
 Image generated with command `python3 img-rect-approx.py doom.png doom-8000rect-max20px.png 8000 20` (885 seconds on my computer):
 
-![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-8000rect-max20px.png)
+![approximation of Doom title screen; looks like a poor-quality JPEG or video file](doom-8000rect-max20px.png)
 
 Image generated with command `python3 img-rect-approx.py doom.png doom-20000rect-max5px.png 20000 5` (85 seconds on my computer):
 
-![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-20000rect-max5px.png)
+![approximation of Doom title screen; looks like a poor-quality JPEG or video file](doom-20000rect-max5px.png)
 
 Image generated with command `python3 img-rect-approx.py doom.png doom-10000rect-max10px.png 10000 10` (110 seconds on my computer):
 
-![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-10000rect-max10px.png)
+![approximation of Doom title screen; looks like a poor-quality JPEG or video file](doom-10000rect-max10px.png)
 
 Image generated with command `python3 img-rect-approx.py doom.png doom-2000rect-max40px.png 2000 40` (431 seconds on my computer):
 
-![approximation of Doom title screen; looks a like a poor-quality JPEG or video file](doom-2000rect-max40px.png)
+![approximation of Doom title screen; looks like a poor-quality JPEG or video file](doom-2000rect-max40px.png)
 
 ## Example &ndash; Wolfenstein 3D
 Original title screen from *Wolfenstein 3D* by id Software:
@@ -68,11 +69,11 @@ Original title screen from *Wolfenstein 3D* by id Software:
 
 Image generated with command `python3 img-rect-approx.py wolf3d.png wolf3d-2000rect-max20px.png 2000 20` (40 seconds on my computer):
 
-![approximation of Wolfenstein 3D title screen; looks a like a poor-quality JPEG or video file](wolf3d-2000rect-max20px.png)
+![approximation of Wolfenstein 3D title screen; looks like a poor-quality JPEG or video file](wolf3d-2000rect-max20px.png)
 
 Image generated with command `python3 img-rect-approx.py wolf3d.png wolf3d-4000rect-max20px.png 4000 20` (206 seconds on my computer):
 
-![approximation of Wolfenstein 3D title screen; looks a like a poor-quality JPEG or video file](wolf3d-4000rect-max20px.png)
+![approximation of Wolfenstein 3D title screen; looks like a poor-quality JPEG or video file](wolf3d-4000rect-max20px.png)
 
 ## Example &ndash; Pride flag
 Original intersex-inclusive progressive pride flag ([source](https://commons.wikimedia.org/wiki/File:Intersex-inclusive_pride_flag.svg)):
@@ -81,8 +82,21 @@ Original intersex-inclusive progressive pride flag ([source](https://commons.wik
 
 Image generated with command `python3 img-rect-approx.py pride.png pride-2000rect-max20px.png 2000 20` (12 seconds on my computer):
 
-![approximation of intersex-inclusive progressive pride flag; looks a like a poor-quality JPEG or video file](pride-2000rect-max20px.png)
+![approximation of intersex-inclusive progressive pride flag; looks like a poor-quality JPEG or video file](pride-2000rect-max20px.png)
 
 Image generated with command `python3 img-rect-approx.py pride.png pride-4000rect-max20px.png 4000 20` (106 seconds on my computer):
 
-![approximation of intersex-inclusive progressive pride flag; looks a like a poor-quality JPEG or video file](pride-4000rect-max20px.png)
+![approximation of intersex-inclusive progressive pride flag; looks like a poor-quality JPEG or video file](pride-4000rect-max20px.png)
+
+## Example &ndash; Lena
+&ldquo;Lena&rdquo; by [Morten Rieger Hannemose](https://mortenhannemose.github.io/lena/):
+
+![Lena](lena.png)
+
+Image generated with command `python3 img-rect-approx.py lena.png lena-2000rect-max20px.png 2000 20` (26 seconds on my computer):
+
+![approximation of Lena](lena-2000rect-max20px.png)
+
+Image generated with command `python3 img-rect-approx.py lena.png lena-4000rect-max20px.png 4000 20` (127 seconds on my computer):
+
+![approximation of Lena](lena-4000rect-max20px.png)
