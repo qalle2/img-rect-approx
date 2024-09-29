@@ -1,7 +1,6 @@
 # approximate an image by drawing rectangles at random
 
 import os, sys, time
-from itertools import chain
 from random import randrange
 try:
     from PIL import Image, ImageDraw
@@ -29,7 +28,7 @@ def parse_arguments():
             "[maxRectangleSize]] ; see README.md for details"
         )
     (inputFile, outputFile) = sys.argv[1:3]
-    rectCount = sys.argv[3]   if len(sys.argv) >= 4 else "1000"
+    rectCount   = sys.argv[3] if len(sys.argv) >= 4 else "1000"
     maxRectSize = sys.argv[4] if len(sys.argv) >= 5 else "20"
 
     rectCount   = parse_integer(rectCount,   0, "Number of rectangles")
@@ -115,7 +114,7 @@ def get_new_image(origImage, args):
             # if it would make the current image less different from the target
             # image, proceed with it, otherwise get another rectangle
             origRect = origImage.crop((x, y, x + width, y + height))
-            currRect = newImage.crop((x, y, x + width, y + height))
+            currRect =  newImage.crop((x, y, x + width, y + height))
             oldRectDiff = get_image_difference(origRect, currRect)
             candidateRectDiff = get_image_and_color_difference(origRect, color)
             if candidateRectDiff < oldRectDiff:
